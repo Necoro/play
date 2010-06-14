@@ -50,6 +50,7 @@ else
 
     local prefix="~/.wine/"
     local gpath size args
+    local x11args
 
     steam () {
         prefix="~/.steam/"
@@ -61,6 +62,7 @@ else
 
     typeset -A games
     games[bg2]='gpath=c:/spiele/bg2/baldur.exe; size=1024x768'
+    games[fallout]='prefix=~/.fallout/; gpath=c:/spiele/fallout/falloutw.exe; size=800x600; x11args="-depth 16"'
     games[steam]='steam'
 
     if [[ -z $games[$game] ]]; then
@@ -74,5 +76,5 @@ else
         eval $games[$game]
     fi
 
-    exc -f startx $0 -x $prefix $gpath $size "$args" -- :1 -ac -br -quiet
+    exc -f startx $0 -x $prefix $gpath $size "$args" -- :1 -ac -br -quiet ${=x11args}
 fi
