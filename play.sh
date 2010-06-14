@@ -18,9 +18,9 @@ exc () {
     sleep 3
 
     if [[ -n $fork ]]; then
-        exec $@ &!
+        exec "$@" &!
     else
-        eval $@
+        eval "$@"
     fi
 }
 
@@ -41,8 +41,14 @@ if [[ $1 == "-x" ]]; then
     exp WINEDEBUG "-all"
     exp DISPLAY ":1"
 
-    exc wine start $gpath $args
+    # start game
+    exc wine start $gpath "$args"
+    
+    # wait for wine to shutdown
     exc wineserver -w
+
+    # when the script reaches this point,
+    # the new X will be terminated
 else
     local game=$1
 
@@ -57,13 +63,14 @@ else
         gpath="c:/Programme/steam/steam.exe"
         size="1280x1024"
 
-        [[ $# > 0 ]] && args=$@
+        [[ $# > 0 ]] && args="-applaunch ${=@}"
     }
 
     typeset -A games
     games[bg2]='gpath=c:/spiele/bg2/baldur.exe; size=1024x768'
     games[fallout]='prefix=~/.fallout/; gpath=c:/spiele/fallout/falloutw.exe; size=800x600; x11args="-depth 16"'
     games[steam]='steam'
+    games[torchlight]='steam 41600'
 
     if [[ -z $games[$game] ]]; then
         echo "*** Game '$game' not found"
@@ -76,5 +83,5 @@ else
         eval $games[$game]
     fi
 
-    exc -f startx $0 -x $prefix $gpath $size "$args" -- :1 -ac -br -quiet ${=x11args}
+    exc -f startx $0 -x $prefix $gpath $size $args -- :1 -ac -br -quiet ${=x11args}
 fi
