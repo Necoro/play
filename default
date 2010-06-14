@@ -1,0 +1,39 @@
+# exporting variables
+EENV[WINEPREFIX]='eval echo $PREFIX'
+ENV[WINEDEBUG]="-all"
+ENV[DISPLAY]=":1"
+
+PREFIX="~/.wine"
+
+default_execute () {
+    exc -f startx $BIN -x $GAME -- :1 -ac -br -quiet ${=EXARGS}
+}
+
+default_prepare () {
+    nvidia-settings -l
+
+    # set display size
+    [[ -n $SIZE ]] && xrandr -s $SIZE
+}
+
+default_setenv () {
+    for e v in ${(kv)ENV}; do
+        exp $e $v
+    done
+    
+    for e v in ${(kv)EENV}; do
+        exp $e `eval $v`
+    done
+}
+
+default_run () {
+    # start game
+    exc wine start $GPATH "$ARGS"
+    
+    # wait for wine to shutdown
+    exc wineserver -w
+}
+
+EXPORT default execute prepare setenv run
+
+# vim:ft=zsh

@@ -1,7 +1,11 @@
-#!/bin/zsh
+#!/bin/zsh -f
+
+log () {
+    echo "*** $@"
+}
 
 exp () {
-    echo "*** Setting envvar '$1' to '$2'"
+    log "Setting envvar '$1' to '$2'"
     export $1=$2
 }
 
@@ -12,7 +16,7 @@ exc () {
         shift
     fi
 
-    echo "*** Executing${msg}:"
+    log "Executing${msg}:"
     echo $@
     
     sleep 3
@@ -24,64 +28,46 @@ exc () {
     fi
 }
 
+EXPORT () {
+    local name=$1
+    shift
+
+    for f in $@; do
+        eval "$f () { ${name}_${f}; }"
+    done
+}
+
+inherit () {
+    source games/$1
+}
+
+typeset -A ENV EENV
+BIN=$0
+
+source default
+
 if [[ $1 == "-x" ]]; then
-    local prefix=$2
-    local gpath=$3
-    local args=$5
-    local size=$4
-
-    # load settings
-    nvidia-settings -l
-
-    # set display size
-    [[ -n $size ]] && xrandr -s $size
-
-    # exporting variables
-    exp WINEPREFIX `eval echo $prefix`
-    exp WINEDEBUG "-all"
-    exp DISPLAY ":1"
-
-    # start game
-    exc wine start $gpath "$args"
-    
-    # wait for wine to shutdown
-    exc wineserver -w
-
-    # when the script reaches this point,
-    # the new X will be terminated
+    source games/$2
+    setenv
+    prepare
+    run
 else
-    local game=$1
+    GAME=$1
 
-    echo "*** Launching '$game'"
-
-    local prefix="~/.wine/"
-    local gpath size args
-    local x11args
-
-    steam () {
-        prefix="~/.steam/"
-        gpath="c:/Programme/steam/steam.exe"
-        size="1280x1024"
-
-        [[ $# > 0 ]] && args="-applaunch ${=@}"
-    }
-
-    typeset -A games
-    games[bg2]='gpath=c:/spiele/bg2/baldur.exe; size=1024x768'
-    games[fallout]='prefix=~/.fallout/; gpath=c:/spiele/fallout/falloutw.exe; size=800x600; x11args="-depth 16"'
-    games[steam]='steam'
-    games[torchlight]='steam 41600'
-
-    if [[ -z $games[$game] ]]; then
-        echo "*** Game '$game' not found"
+    list () {
         echo "Games are:"
-        for k in ${(ko)games}; do
+        for k in games/*(.:t); do
             echo "\t> $k"
         done
+    }
+    
+    if [[ -z $GAME || ! -e games/$GAME ]]; then
+        [[ ! -e games/$GAME ]] && log "Game '$GAME' not found"
+        list
         exit 1
     else
-        eval $games[$game]
+        log "Launching '$GAME'"
+        source games/$GAME
+        execute
     fi
-
-    exc -f startx $0 -x $prefix $gpath $size $args -- :1 -ac -br -quiet ${=x11args}
 fi

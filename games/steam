@@ -1,0 +1,7 @@
+PREFIX="~/.steam"
+SIZE="1280x1024"
+GPATH="c:/programme/steam/steam.exe"
+
+steamapp () {
+    [[ $# > 0 ]] && export ARGS="-applaunch ${=@}"
+}
