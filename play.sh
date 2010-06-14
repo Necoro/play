@@ -20,7 +20,7 @@ exc () {
     if [[ -n $fork ]]; then
         exec $@ &!
     else
-        exec $@
+        eval $@
     fi
 }
 
@@ -42,6 +42,7 @@ if [[ $1 == "-x" ]]; then
     exp DISPLAY ":1"
 
     exc wine start $gpath $args
+    exc wineserver -w
 else
     local game=$1
 
@@ -59,7 +60,8 @@ else
     }
 
     typeset -A games
-    games[steam]="steam"
+    games[bg2]='gpath=c:/spiele/bg2/baldur.exe; size=1024x768'
+    games[steam]='steam'
 
     if [[ -z $games[$game] ]]; then
         echo "*** Game '$game' not found"
