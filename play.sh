@@ -98,7 +98,10 @@ default_run () {
     exc wineserver -w
 }
 
-EXPORT default execute prepare setenv run
+default_cleanup () {
+}
+
+EXPORT default execute prepare setenv run cleanup
 # }}}
 
 if [[ $1 == "-x" ]]; then
@@ -106,6 +109,7 @@ if [[ $1 == "-x" ]]; then
     setenv
     prepare
     run
+    cleanup
 else
     GAME=$1
     DGAME="$PLAY_GAMES/$GAME"
