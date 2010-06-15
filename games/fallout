@@ -1,3 +1,5 @@
 PREFIX="~/.fallout"
 SIZE="640x480"
 GPATH="c:/spiele/fallout/falloutw.exe"
+
+# vim:ft=sh

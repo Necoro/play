@@ -1,73 +1,43 @@
 #!/bin/zsh -f
 
-log () {
-    echo "*** $@"
-}
+PLAY_DEBUG=${PLAY_DEBUG:-0}
 
-exp () {
-    log "Setting envvar '$1' to '$2'"
-    export $1=$2
-}
+[[ $PLAY_DEBUG == 2 ]] && setopt xtrace
 
-exc () {
-    if [[ $1 == "-f" ]]; then
-        fork=1
-        msg=" (forking)"
-        shift
-    fi
-
-    log "Executing${msg}:"
-    echo $@
-    
-    sleep 3
-
-    if [[ -n $fork ]]; then
-        exec "$@" &!
-    else
-        eval "$@"
-    fi
-}
-
-EXPORT () {
-    local name=$1
-    shift
-
-    for f in $@; do
-        eval "$f () { ${name}_${f}; }"
-    done
-}
-
-inherit () {
-    source games/$1
-}
+PLAY_DIR="${PLAY_DIR:-${0:h}}"
+PLAY_GAMES="${PLAY_GAMES:-$PLAY_DIR/games}"
+PLAY_TEMPLATES="${PLAY_TEMPLATES:-$PLAY_DIR/templates}"
 
 typeset -A ENV EENV
 BIN=$0
 
-source default
+source $PLAY_DIR/functions.sh
+
+inherit default
 
 if [[ $1 == "-x" ]]; then
-    source games/$2
+    source $PLAY_GAMES/$2
     setenv
     prepare
     run
 else
     GAME=$1
+    DGAME="$PLAY_GAMES/$GAME"
 
     list () {
-        echo "Games are:"
-        for k in games/*(.:t); do
+        out "Games are:"
+        for k in $PLAY_GAMES/*(.:t); do
             echo "\t> $k"
         done
     }
     
-    if [[ -z $GAME || ! -e games/$GAME ]]; then
-        [[ ! -e games/$GAME ]] && log "Game '$GAME' not found"
+    if [[ -z $GAME || ! -e $DGAME ]]; then
+        [[ ! -e $DGAME ]] && out "Game '$GAME' not found"
         list
         exit 1
     else
-        log "Launching '$GAME'"
-        source games/$GAME
+        out "Launching '$GAME'"
+        source $DGAME
         execute
     fi
 fi

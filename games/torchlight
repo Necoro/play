@@ -1,3 +1,5 @@
 inherit steam
 
 steamapp 41600
+
+# vim:ft=sh

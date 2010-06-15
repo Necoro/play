@@ -6,7 +6,7 @@ ENV[DISPLAY]=":1"
 PREFIX="~/.wine"
 
 default_execute () {
-    exc -f startx $BIN -x $GAME -- :1 -ac -br -quiet ${=EXARGS}
+    exc -e startx $BIN -x $GAME -- :1 -ac -br -quiet ${=EXARGS}
 }
 
 default_prepare () {
@@ -36,4 +36,4 @@ default_run () {
 
 EXPORT default execute prepare setenv run
 
-# vim:ft=zsh
+# vim:ft=sh
