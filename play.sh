@@ -35,12 +35,8 @@ exc () {
         shift
     fi
 
-    if [[ $PLAY_DEBUG > 0 ]]; then
-        log "Executing (using '$cmd'):"
-        log "> $@"
-        
-        sleep 3
-    fi
+    log "Executing (using '$cmd'):"
+    log "> $@"
 
     $cmd "$@"
 }
@@ -74,10 +70,10 @@ default_execute () {
 }
 
 default_prepare () {
-    nvidia-settings -l
+    exc nvidia-settings -l
 
     # set display size
-    [[ -n $SIZE ]] && xrandr -s $SIZE
+    [[ -n $SIZE ]] && exc xrandr -s $SIZE
 }
 
 default_setenv () {
