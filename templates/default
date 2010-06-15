@@ -1,0 +1,11 @@
+default_prepare () {
+    exc nvidia-settings -l
+
+    play_prepare
+}
+
+ENV[WINEDEBUG]="-all"
+
+EXPORT default prepare
+
+# vim:ft=sh

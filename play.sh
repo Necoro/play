@@ -22,6 +22,11 @@ log () {
     [[ $PLAY_DEBUG > 0 ]] && echo "*** $@"
 }
 
+die () {
+    out "*** ERROR: $@"
+    exit 1
+}
+
 exp () {
     log "Setting envvar '$1' to '$2'"
     export $1=$2
@@ -51,7 +56,24 @@ EXPORT () {
 }
 
 inherit () {
+    zparseopts -D e=nonfatal
+    
+    if [[ ! -e $PLAY_TEMPLATES/$1 ]]; then
+        if [[ -n $nonfatal ]]; then
+            log "Template '$1' not found"
+            return
+        else
+            die "Template '$1' not found"
+        fi
+    fi
+    
     source $PLAY_TEMPLATES/$1
+}
+
+load () {
+    inherit -e default
+
+    source "$PLAY_GAMES/$1"
 }
 # }}}
 
@@ -59,24 +81,21 @@ inherit () {
 
 # exporting variables
 EENV[WINEPREFIX]='eval echo $PREFIX'
-ENV[WINEDEBUG]="-all"
 ENV[DISPLAY]=":1"
 
 PREFIX="~/.wine"
 
 # functions
-default_execute () {
+play_execute () {
     exc -e startx $BIN -x $GAME -- :1 -ac -br -quiet ${=EXARGS}
 }
 
-default_prepare () {
-    exc nvidia-settings -l
-
+play_prepare () {
     # set display size
     [[ -n $SIZE ]] && exc xrandr -s $SIZE
 }
 
-default_setenv () {
+play_setenv () {
     for e v in ${(kv)ENV}; do
         exp $e $v
     done
@@ -86,7 +105,7 @@ default_setenv () {
     done
 }
 
-default_run () {
+play_run () {
     # start game
     exc wine start $GPATH "$ARGS"
     
@@ -94,14 +113,14 @@ default_run () {
     exc wineserver -w
 }
 
-default_cleanup () {
+play_cleanup () {
 }
 
-EXPORT default execute prepare setenv run cleanup
+EXPORT play execute prepare setenv run cleanup
 # }}}
 
 if [[ $1 == "-x" ]]; then
-    source $PLAY_GAMES/$2
+    load $2
     setenv
     prepare
     run
@@ -123,7 +142,7 @@ else
         exit 1
     else
         out "Launching '$GAME'"
-        source $DGAME
+        load $GAME
         execute
     fi
 fi
