@@ -1,5 +1,6 @@
 #!/bin/zsh -f
 
+# initialization {{{
 PLAY_DEBUG=${PLAY_DEBUG:-0}
 
 [[ $PLAY_DEBUG == 2 ]] && setopt xtrace
@@ -10,10 +11,95 @@ PLAY_TEMPLATES="${PLAY_TEMPLATES:-$PLAY_DIR/templates}"
 
 typeset -A ENV EENV
 BIN=$0
+# }}}
 
-source $PLAY_DIR/functions.sh
+# global functions {{{
+out () {
+    echo ">>> $@"
+}
 
-inherit default
+log () {
+    [[ $PLAY_DEBUG > 0 ]] && echo "*** $@"
+}
+
+exp () {
+    log "Setting envvar '$1' to '$2'"
+    export $1=$2
+}
+
+exc () {
+    cmd="eval"
+
+    if [[ $1 == "-e" ]]; then
+        cmd="exec"
+        shift
+    fi
+
+    if [[ $PLAY_DEBUG > 0 ]]; then
+        log "Executing (using '$cmd'):"
+        log "> $@"
+        
+        sleep 3
+    fi
+
+    $cmd "$@"
+}
+
+EXPORT () {
+    local name=$1
+    shift
+
+    for f in $@; do
+        eval "$f () { ${name}_${f}; }"
+    done
+}
+
+inherit () {
+    source $PLAY_TEMPLATES/$1
+}
+# }}}
+
+# default template {{{
+
+# exporting variables
+EENV[WINEPREFIX]='eval echo $PREFIX'
+ENV[WINEDEBUG]="-all"
+ENV[DISPLAY]=":1"
+
+PREFIX="~/.wine"
+
+# functions
+default_execute () {
+    exc -e startx $BIN -x $GAME -- :1 -ac -br -quiet ${=EXARGS}
+}
+
+default_prepare () {
+    nvidia-settings -l
+
+    # set display size
+    [[ -n $SIZE ]] && xrandr -s $SIZE
+}
+
+default_setenv () {
+    for e v in ${(kv)ENV}; do
+        exp $e $v
+    done
+    
+    for e v in ${(kv)EENV}; do
+        exp $e `eval $v`
+    done
+}
+
+default_run () {
+    # start game
+    exc wine start $GPATH "$ARGS"
+    
+    # wait for wine to shutdown
+    exc wineserver -w
+}
+
+EXPORT default execute prepare setenv run
+# }}}
 
 if [[ $1 == "-x" ]]; then
     source $PLAY_GAMES/$2
@@ -41,3 +127,5 @@ else
         execute
     fi
 fi
+
+# vim: foldmethod=marker
