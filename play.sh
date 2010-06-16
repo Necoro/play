@@ -87,7 +87,7 @@ PREFIX="~/.wine"
 
 # functions
 play_execute () {
-    exc -e startx $BIN -x $GAME -- :1 -ac -br -quiet ${=EXARGS}
+    exc -e startx $BIN -x $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
 }
 
 play_prepare () {
@@ -121,7 +121,6 @@ EXPORT play execute prepare setenv run cleanup
 
 if [[ $1 == "-x" ]]; then
     load $2
-    setenv
     prepare
     run
     cleanup
@@ -143,6 +142,7 @@ else
     else
         out "Launching '$GAME'"
         load $GAME
+        setenv
         execute
     fi
 fi
