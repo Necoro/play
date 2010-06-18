@@ -1,0 +1,11 @@
+PREFIX="$HOME/.fallout"
+SIZE="832x624"
+GPATH="fallout2.exe"
+EXARGS="-depth 16"
+
+prepare () {
+    default_prepare
+    exc cd "$PREFIX/drive_c/spiele/fallout2"
+}
+
+# vim:ft=sh
