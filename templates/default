@@ -4,7 +4,7 @@ default_prepare () {
     play_prepare
 }
 
-ENV[WINEDEBUG]="-all"
+[[ $PLAY_DEBUG == 0 ]] && ENV[WINEDEBUG]="-all"
 
 EXPORT default prepare
 
