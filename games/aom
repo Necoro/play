@@ -1,0 +1,5 @@
+PREFIX="aom"
+SIZE="1024x768"
+GPATH="c:/aom/aom.exe"
+
+# vim:ft=sh
