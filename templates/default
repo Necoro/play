@@ -6,6 +6,8 @@ default_prepare () {
 
 [[ $PLAY_DEBUG == 0 ]] && ENV[WINEDEBUG]="-all"
 
+[[ -z $NO_WINEINSTS ]] && EENV[WINEPREFIX]='eval echo $HOME/.wineinsts/$PREFIX'
+
 EXPORT default prepare
 
 # vim:ft=sh
