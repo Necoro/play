@@ -1,4 +1,4 @@
-PREFIX="$HOME/.fallout"
+PREFIX="fallout"
 SIZE="832x624"
 GPATH="fallout2.exe"
 EXARGS="-depth 16"
