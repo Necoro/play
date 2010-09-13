@@ -5,8 +5,7 @@ default_prepare () {
 }
 
 [[ $PLAY_DEBUG == 0 ]] && ENV[WINEDEBUG]="-all"
-
-[[ -z $NO_WINEINSTS ]] && EENV[WINEPREFIX]='eval echo $HOME/.wineinsts/$PREFIX'
+EENV[WINEPREFIX]='{ [[ -z $NO_WINEINSTS ]] && echo $HOME/.wineinsts/$PREFIX; } || echo $PREFIX'
 
 EXPORT default prepare
 
