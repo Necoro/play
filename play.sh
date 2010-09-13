@@ -6,7 +6,7 @@ PLAY_DEBUG=${PLAY_DEBUG:-0}
 [[ $PLAY_DEBUG == 2 ]] && setopt xtrace
 
 PLAY_DIR="${PLAY_DIR:-${0:h}}"
-PLAY_GAMES="${PLAY_GAMES:-$PLAY_DIR/games}"
+PLAY_GAMES="${PLAY_GAMES:-$PLAY_DIR/installed}"
 PLAY_TEMPLATES="${PLAY_TEMPLATES:-$PLAY_DIR/templates}"
 
 typeset -A ENV EENV
@@ -130,7 +130,7 @@ else
 
     list () {
         out "Games are:"
-        for k in $PLAY_GAMES/*(.:t); do
+        for k in $PLAY_GAMES/*(.,@:t); do
             echo "\t> $k"
         done
     }
