@@ -97,10 +97,12 @@ play_prepare () {
 
 play_setenv () {
     for e v in ${(kv)ENV}; do
+        v=${(P)${:-PLAY_ENV_$e}:-$v}
         exp $e $v
     done
     
     for e v in ${(kv)EENV}; do
+        v=${(P)${:-PLAY_EENV_$e}:-$v}
         exp $e `eval $v`
     done
 }
