@@ -1,5 +1,6 @@
-PREFIX="fallout"
-SIZE="832x624"
+NO_WINEINSTS=1
+PREFIX="$HOME/.wineinsts/fallout"
+SIZE="800x600"
 GPATH="fallout2.exe"
 EXARGS="-depth 16"
 
