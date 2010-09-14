@@ -1,0 +1,25 @@
+
+_cdemu_dev () {
+    exc "cdemu device-mapping | grep \"^${CDEMU_NO}\" | tr -s ' ' | cut -f 2 -d' '"
+}
+
+iso_prepare () {
+    default_prepare
+
+    declare -g MOUNT CDEMU_NO
+
+    [[ $MOUNT != /* ]] && MOUNT="$HOME/isos/spiele/$MOUNT"
+    CDEMU_NO=${CDEMU_NO:-0}
+
+    exc cdemu load $CDEMU_NO "$MOUNT"
+    exc mount $(_cdemu_dev)
+}
+
+iso_cleanup () {
+    exc umount $(_cdemu_dev)
+    exc cdemu unload $CDEMU_NO
+}
+
+EXPORT iso prepare cleanup
+
+# vim:ft=sh

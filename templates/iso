@@ -1,18 +1,8 @@
 
-iso_prepare () {
-    default_prepare
-
-    declare -g MOUNT MOUNTTARGET
-
-    [[ $MOUNT != /* ]] && MOUNT="$HOME/isos/spiele/$MOUNT"
-    [[ -z $MOUNTTARGET ]] && MOUNTTARGET="$HOME/isos/mnt"
-    exc fuseiso $MOUNT $MOUNTTARGET
-}
-
-iso_cleanup () {
-    exc fusermount -u $MOUNTTARGET
-}
-
-EXPORT iso prepare cleanup
+if [[ $ISO_TYPE == 'fuseiso' || -n $MOUNTTARGET ]]; then
+    inherit fuseiso
+else
+    inherit cdemu
+fi
 
 # vim:ft=sh
