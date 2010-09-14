@@ -15,11 +15,11 @@ BIN=$0
 
 # global functions {{{
 out () {
-    echo ">>> $@"
+    echo ">>> $@" >&2
 }
 
 log () {
-    [[ $PLAY_DEBUG > 0 ]] && echo "*** $@"
+    [[ $PLAY_DEBUG > 0 ]] && echo "*** $@" >&2
 }
 
 die () {
@@ -129,7 +129,7 @@ else
     DGAME="$PLAY_GAMES/$GAME"
 
     list () {
-        out "Games are:"
+        out "The installed games are:"
         for k in $PLAY_GAMES/*(.,@:t); do
             echo "\t> $k"
         done
