@@ -1,8 +1,17 @@
 
-if [[ $ISO_TYPE == 'fuseiso' || -n $MOUNTTARGET ]]; then
-    inherit fuseiso
-else
-    inherit cdemu
+if [[ -z $ISO_TYPE ]]; then
+    # default
+    ISO_TYPE='cdemu'
+    
+    # guess :)
+    [[ -n $MOUNTTARGET ]] && ISO_TYPE='fuseiso'
+    [[ -n $CDEMU_NO ]] && ISO_TYPE='cdemu'
 fi
+
+case $ISO_TYPE in
+    'fuseiso') inherit fuseiso;;
+    'cdemu')   inherit cdemu;;
+    *) die "Unknown ISO_TYPE: '$ISO_TYPE'";;
+esac
 
 # vim:ft=sh
