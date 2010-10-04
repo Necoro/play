@@ -108,6 +108,10 @@ play_setenv () {
 }
 
 play_run () {
+    # cd into dir
+    local dir=$(exc winepath -u "$GPATH")
+    exc cd $(dirname $dir)
+
     # start game
     exc wine start $GPATH "$ARGS"
     
