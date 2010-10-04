@@ -1,0 +1,30 @@
+ISO_TYPE=fuseiso
+
+inherit iso
+
+PREFIX="infinity"
+#SIZE="1280x960"
+SIZE="640x480"
+GPATH="c:/torment/torment.exe"
+EXARGS="-depth 16"
+
+mnttrgt="$WINEPREFIX/drive_c/tormentcds"
+
+prepare ()
+{
+    for i in 1 2 3 4; do
+        MOUNTTARGET="$mnttrgt/cd$i"
+        MOUNT=torment/TormentCD$i.iso
+        iso_prepare
+    done
+}
+
+cleanup ()
+{
+    for i in 1 2 3 4; do
+        MOUNTTARGET="$mnttrgt/cd$i"
+        iso_cleanup
+    done
+}
+
+# vim:ft=sh
