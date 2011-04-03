@@ -100,6 +100,7 @@ play_prepare () {
 }
 
 play_setenv () {
+    PREFIX=${PREFIX:-$GAME}
     for e v in ${(kv)ENV}; do
         v=${(P)${:-PLAY_ENV_$e}:-$v}
         exp $e $v
