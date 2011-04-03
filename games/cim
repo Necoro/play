@@ -1,0 +1,7 @@
+PREFIX="cim"
+SIZE="1024x768"
+
+# running it via steam does not work for obscure reasons :-/
+GPATH="C:/Programme/Steam/SteamApps/common/cities in motion/Cities In Motion.exe"
+
+# vim:ft=sh
