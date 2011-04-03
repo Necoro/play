@@ -15,15 +15,15 @@ BIN=$0
 
 # global functions {{{
 out () {
-    echo ">>> $@" >&2
+    echo ">>> $*" >&2
 }
 
 log () {
-    [[ $PLAY_DEBUG > 0 ]] && echo "*** $@" >&2
+    [[ $PLAY_DEBUG > 0 ]] && echo "*** $*" >&2
 }
 
 die () {
-    out "*** ERROR: $@"
+    out "*** ERROR: $*"
     exit 1
 }
 
@@ -33,7 +33,7 @@ exp () {
 }
 
 exc () {
-    cmd="eval"
+    local cmd="eval"
 
     if [[ $1 == "-e" ]]; then
         cmd="exec"
@@ -41,9 +41,13 @@ exc () {
     fi
 
     log "Executing (using '$cmd'):"
-    log "> $@"
+    log "> $*"
 
-    $cmd "$@"
+    if [[ $cmd == exec ]]; then
+        exec $@
+    else
+        $*
+    fi
 }
 
 EXPORT () {
@@ -109,8 +113,8 @@ play_setenv () {
 
 play_run () {
     # cd into dir
-    local dir=$(exc winepath -u "$GPATH")
-    exc cd $(dirname $dir)
+    local dir="$(exc winepath -u $GPATH)"
+    exc cd "$(dirname $dir)"
 
     # start game
     exc wine start $GPATH "$ARGS"
