@@ -6,7 +6,7 @@ iso_prepare () {
 
     [[ $MOUNT != /* ]] && MOUNT="$HOME/isos/spiele/$MOUNT"
     [[ -z $MOUNTTARGET ]] && MOUNTTARGET="$HOME/isos/mnt"
-    exc fuseiso $MOUNT $MOUNTTARGET
+    exc fuseiso -p $MOUNT $MOUNTTARGET
 }
 
 iso_cleanup () {

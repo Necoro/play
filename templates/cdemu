@@ -1,6 +1,6 @@
 
 _cdemu_dev () {
-    exc "cdemu device-mapping | grep \"^${CDEMU_NO}\" | tr -s ' ' | cut -f 2 -d' '"
+    exc eval "cdemu device-mapping | grep \"^${CDEMU_NO}\" | tr -s ' ' | cut -f 2 -d' '"
 }
 
 iso_prepare () {
