@@ -1,4 +1,11 @@
-SIZE="1024x768"
-GPATH="c:/spiele/bg2/baldur.exe"
+ISO_TYPE=fuseiso
+
+inherit iso
+
+SIZE="1280x960"
+GPATH="c:/bg2/bgmain.exe"
+
+MOUNT="bg2/tob.iso"
+MOUNTTARGET="$HOME/isos/mnt/tob"
 
 # vim:ft=sh

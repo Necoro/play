@@ -4,7 +4,7 @@ inherit iso
 
 PREFIX="infinity"
 #SIZE="1280x960"
-SIZE="640x480"
+SIZE="1280x960"
 GPATH="c:/torment/torment.exe"
 EXARGS="-depth 16"
 

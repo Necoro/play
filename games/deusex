@@ -1,0 +1,8 @@
+PREFIX="deus_ex"
+GPATH="c:/DeusEx/System/HDTP.exe"
+ARGS=QINI=C:/deusex/system/hdtp.ini USERINI=C:/deusex/system/hdtpuser.ini
+SIZE="1280x960"
+
+MOUNT='Deus Ex v1002f.iso'
+
+# vim:ft=sh

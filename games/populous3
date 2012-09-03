@@ -1,6 +1,0 @@
-PREFIX="populous"
-SIZE="1024x768"
-GPATH="c:/populous/popTB.exe"
-EXARGS="-depth 16"
-
-# vim:ft=sh

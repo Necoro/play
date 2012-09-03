@@ -1,5 +1,0 @@
-PREFIX="totalwar"
-SIZE="1024x768"
-GPATH="c:/totalwar2/medieval2.exe"
-
-# vim:ft=sh

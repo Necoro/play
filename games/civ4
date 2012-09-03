@@ -1,5 +1,0 @@
-PREFIX="civ4"
-SIZE="1280x1024"
-GPATH="c:/civ4/Civilization4.exe"
-
-# vim:ft=sh
