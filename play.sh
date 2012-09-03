@@ -87,8 +87,6 @@ load () {
 EENV[WINEPREFIX]='eval echo $PREFIX'
 ENV[DISPLAY]=":1"
 
-PREFIX="~/.wine"
-
 # functions
 play_execute () {
     exc -e startx $BIN -x $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
@@ -100,7 +98,13 @@ play_prepare () {
 }
 
 play_setenv () {
+    # default PREFIX
     PREFIX=${PREFIX:-$GAME}
+
+    # set environment
+    # ENV is set directly -- EENV is evaluated
+    # it is possible to override ENV[p] by PLAY_ENV_p
+    # (and similar for EENV)
     for e v in ${(kv)ENV}; do
         v=${(P)${:-PLAY_ENV_$e}:-$v}
         exp $e $v
@@ -131,7 +135,8 @@ EXPORT play execute prepare setenv run cleanup
 # }}}
 
 if [[ $1 == "-x" ]]; then
-    load $2
+    GAME=$2
+    load $GAME
     prepare
     run
     cleanup
