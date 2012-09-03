@@ -11,11 +11,18 @@ PLAY_TEMPLATES="${PLAY_TEMPLATES:-$PLAY_DIR/templates}"
 
 typeset -A ENV EENV
 BIN=$0
+
+PLAY_BIN=${PLAY_BIN:-$BIN}
 # }}}
 
 # global functions {{{
 out () {
-    echo ">>> $*" >&2
+    if [[ $1 == "-n" ]]; then
+        n="-n"
+        shift
+    fi
+
+    echo $n ">>> $*" >&2
 }
 
 log () {
@@ -79,6 +86,22 @@ load () {
 
     source "$PLAY_GAMES/$1"
 }
+
+set_env () {
+    local k=$1
+    local v=${ENV[$k]}
+
+    v=${(P)${:-PLAY_ENV_$k}:-$v}
+    exp $k $v
+}
+
+set_eenv () {
+    local k=$1
+    local v=${EENV[$k]}
+    v=${(P)${:-PLAY_EENV_$k}:-$v}
+    exp $k `eval $v`
+}
+
 # }}}
 
 # default template {{{
@@ -105,14 +128,12 @@ play_setenv () {
     # ENV is set directly -- EENV is evaluated
     # it is possible to override ENV[p] by PLAY_ENV_p
     # (and similar for EENV)
-    for e v in ${(kv)ENV}; do
-        v=${(P)${:-PLAY_ENV_$e}:-$v}
-        exp $e $v
+    for e in ${(k)ENV}; do
+        set_env $e
     done
     
-    for e v in ${(kv)EENV}; do
-        v=${(P)${:-PLAY_EENV_$e}:-$v}
-        exp $e `eval $v`
+    for e in ${(k)EENV}; do
+        set_eenv $e
     done
 }
 
@@ -134,26 +155,72 @@ play_cleanup () {
 EXPORT play execute prepare setenv run cleanup
 # }}}
 
-if [[ $1 == "-x" ]]; then
-    GAME=$2
+_list () {
+    out "The installed games are:"
+    for k in $PLAY_GAMES/*(.,@:t); do
+        echo "\t> $k"
+    done
+}
+
+_new () {
+    local GAME=$1
+    local DGAME="$PLAY_GAMES/$GAME"
+    local GPATH=$2
+    local PREFIX=${${3}:-$GAME}
+    local convpath
+
+    [[ -e $DGAME ]] && die "Game file already existing -- aborting!"
+
+    inherit -e default
+    set_eenv WINEPREFIX
+    set_env WINEDEBUG
+    
+    [[ ! -e $WINEPREFIX ]] && die "Specified prefix '$PREFIX' does not exist"
+
+    convpath="$(exc winepath -u $GPATH)"
+
+    [[ ! -e $convpath ]] && die "Specified executable does not exist"
+
+    [[ -n $3 ]] && GPREFIX="PREFIX=\"$3\""
+
+    # everything is fine -- write file
+    cat > $DGAME << EOF
+$GPREFIX
+GPATH="$GPATH"
+
+# vim:ft=sh
+EOF
+
+    out "New game successfully created"
+    out "You can play it by '$PLAY_BIN $GAME'"
+    out -n "Play it now? [y/n] "
+    if read -q; then
+        echo
+        exc -e $BIN $GAME
+    else
+        echo
+    fi
+}
+
+_execute () {
+    declare -g GAME=$1
+    
     load $GAME
     prepare
     run
     cleanup
-else
-    GAME=$1
-    DGAME="$PLAY_GAMES/$GAME"
+}
 
-    list () {
-        out "The installed games are:"
-        for k in $PLAY_GAMES/*(.,@:t); do
-            echo "\t> $k"
-        done
-    }
-    
-    if [[ -z $GAME || ! -e $DGAME ]]; then
+_run () {
+    declare -g GAME=$1
+    local DGAME="$PLAY_GAMES/$GAME"
+
+    if [[ $GAME == new ]]; then
+        shift
+        _new "$@"
+    elif [[ -z $GAME || ! -e $DGAME ]]; then
         [[ ! -e $DGAME ]] && out "Game '$GAME' not found"
-        list
+        _list
         exit 1
     else
         out "Launching '$GAME'"
@@ -161,6 +228,12 @@ else
         setenv
         execute
     fi
+}
+
+if [[ $1 == "-x" ]]; then
+    _execute $2
+else
+    _run "$@"
 fi
 
 # vim: foldmethod=marker
