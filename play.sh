@@ -10,9 +10,9 @@ PLAY_GAMES="${PLAY_GAMES:-$PLAY_DIR/installed}"
 PLAY_TEMPLATES="${PLAY_TEMPLATES:-$PLAY_DIR/templates}"
 
 typeset -A ENV EENV
-BIN=$0
+BIN=${0:A}
 
-PLAY_BIN=${PLAY_BIN:-$BIN}
+PLAY_BIN=${PLAY_BIN:-$0}
 # }}}
 
 # global functions {{{
@@ -140,10 +140,10 @@ play_setenv () {
 play_run () {
     # cd into dir
     local dir="$(exc winepath -u $GPATH)"
-    exc cd "$(dirname $dir)"
+    exc cd "${dir:h}"
 
     # start game
-    exc wine start $GPATH "$ARGS"
+    exc wine start ${dir:t} "$ARGS"
     
     # wait for wine to shutdown
     exc wineserver -w
@@ -157,7 +157,11 @@ EXPORT play execute prepare setenv run cleanup
 
 _list () {
     out "The installed games are:"
-    for k in $PLAY_GAMES/*(.,@:t); do
+    # on -> sort alphabetically
+    # N -> NULL_GLOB -> no error message if no match
+    # .,@ -> regular files or symbolic links (, == or)
+    # :t -> modifier: only basename
+    for k in $PLAY_GAMES/*(onN.,@:t); do
         echo "\t> $k"
     done
 }
