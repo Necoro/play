@@ -3,12 +3,13 @@
 # variables gathered from the environment {{{1
 
 # debugging
-# 0 -> off
-# 1 -> log messages (mostly 'eval' calls) and wine debug
-# 2 -> 1 + xtrace
+# 0 -> off (+ WINEDEBUG=-all)
+# 1 -> log messages (mostly 'eval' calls) (+ WINEDEBUG=-all)
+# 2 -> log messages (+ default WINEDEBUG)
+# 3 -> 2 + xtrace
 PLAY_DEBUG=${PLAY_DEBUG:-0}
 
-[[ $PLAY_DEBUG == 2 ]] && setopt xtrace
+[[ $PLAY_DEBUG == 3 ]] && setopt xtrace
 
 # directory we are in
 PLAY_DIR="${PLAY_DIR:-${0:h}}"
@@ -145,6 +146,8 @@ EXPORT () {
 
 EENV[WINEPREFIX]='eval echo $PREFIX'
 ENV[DISPLAY]=":1"
+
+[[ $PLAY_DEBUG -le 1 ]] && ENV[WINEDEBUG]="-all"
 
 # phase functions {{{1
 
