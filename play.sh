@@ -149,12 +149,13 @@ ENV[DISPLAY]=":1"
 # phase functions {{{1
 
 # Array of phases
-PHASES=(execute setenv run prepare cleanup)
+PHASES=(startX setenv run prepare cleanup)
 declare -r PHASES
 
-# to be removed
-play_execute () {
-    exc -e startx $BIN -x $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
+# starts a new X
+# if overridden, this MUST call `$BIN --in-X`
+play_startX () {
+    exc -e startx $BIN --in-X $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
 }
 
 # populate the environment
@@ -259,7 +260,7 @@ EOF
     fi
 }
 
-_execute () { # {{{2
+_continue_in_X () { # {{{2
     _load
     prepare
     run
@@ -281,13 +282,13 @@ _run () { #{{{2
         out "Launching '$GAME'"
         _load
         setenv
-        execute
+        startX
     fi
 }
 
 # main {{{1
-if [[ $1 == "-x" ]]; then
-    _execute
+if [[ $1 == "--in-X" ]]; then
+    _continue_in_X
 else
     _run "$@"
 fi
