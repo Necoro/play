@@ -1,5 +1,5 @@
 
-iso_prepare () {
+fuseiso_prepare () {
     default_prepare
 
     declare -g MOUNT MOUNTTARGET
@@ -9,10 +9,10 @@ iso_prepare () {
     exc fuseiso -p $MOUNT $MOUNTTARGET
 }
 
-iso_cleanup () {
+fuseiso_cleanup () {
     exc fusermount -u $MOUNTTARGET
 }
 
-EXPORT iso prepare cleanup
+EXPORT prepare cleanup
 
 # vim:ft=sh

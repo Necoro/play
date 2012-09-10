@@ -32,6 +32,9 @@ typeset -A ENV EENV
 # current binary -- complete path
 BIN=${0:A}
 
+# current template -- used for EXPORT
+CUR_TEMPLATE=play
+
 # global functions {{{1
 
 # print passed arguments to stderr
@@ -106,6 +109,10 @@ set_eenv () {
 inherit () {
     zparseopts -D e=nonfatal
     
+    local old_templ=$CUR_TEMPLATE
+
+    CUR_TEMPLATE=$1
+
     if [[ ! -e $PLAY_TEMPLATES/$1 ]]; then
         if [[ -n $nonfatal ]]; then
             log "Template '$1' not found"
@@ -116,17 +123,21 @@ inherit () {
     fi
     
     source $PLAY_TEMPLATES/$1
+
+    CUR_TEMPLATE=$old_templ
 }
 
 # function, that is used to _export_ the default phase functions
-# i.e. 'EXPORT bla prepare' will set bla_prepare as the function being called
+# i.e. 'EXPORT prepare' in template 'bla' will set bla_prepare as the function being called
 # on prepare()
+# NB: this relies on CUR_TEMPLATE being correct -- DO NOT set CUR_TEMPLATE in a game file!
 EXPORT () {
-    local name=$1
-    shift
-
     for f in $@; do
-        eval "$f () { ${name}_${f}; }"
+        if [[ -n $PHASES[(r)$f] ]]; then
+            eval "$f () { ${CUR_TEMPLATE}_${f}; }"
+        else
+            log "Invalid phase function '$f' exported in $CUR_TEMPLATE"
+        fi
     done
 }
 
@@ -136,6 +147,10 @@ EENV[WINEPREFIX]='eval echo $PREFIX'
 ENV[DISPLAY]=":1"
 
 # phase functions {{{1
+
+# Array of phases
+PHASES=(execute setenv run prepare cleanup)
+declare -r PHASES
 
 # to be removed
 play_execute () {
@@ -183,7 +198,7 @@ play_prepare () {
 play_cleanup () {
 }
 
-EXPORT play execute prepare setenv run cleanup
+EXPORT $PHASES[@]
 
 # internal functions {{{1
 

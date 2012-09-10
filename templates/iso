@@ -14,4 +14,16 @@ case $ISO_TYPE in
     *) die "Unknown ISO_TYPE: '$ISO_TYPE'";;
 esac
 
+
+# wrapper phases
+
+iso_prepare () {
+    ${ISO_TYPE}_prepare
+}
+
+iso_cleanup () {
+    ${ISO_TYPE}_cleanup
+}
+
+EXPORT prepare cleanup
 # vim:ft=sh

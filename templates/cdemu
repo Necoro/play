@@ -3,7 +3,7 @@ _cdemu_dev () {
     exc eval "cdemu device-mapping | grep \"^${CDEMU_NO}\" | tr -s ' ' | cut -f 2 -d' '"
 }
 
-iso_prepare () {
+cdemu_prepare () {
     default_prepare
 
     declare -g MOUNT CDEMU_NO
@@ -15,11 +15,11 @@ iso_prepare () {
     exc mount $(_cdemu_dev)
 }
 
-iso_cleanup () {
+cdemu_cleanup () {
     exc umount $(_cdemu_dev)
     exc cdemu unload $CDEMU_NO
 }
 
-EXPORT iso prepare cleanup
+EXPORT prepare cleanup
 
 # vim:ft=sh
