@@ -282,12 +282,19 @@ _run () { #{{{2
         _list
         exit 1
     else
-        out "Launching '$GAME'"
-        _load
-        setenv
-        prepare
-        startX
-        cleanup
+        if [[ $2 == "cleanup" ]]; then
+            out "Cleaning up after '$GAME'"
+            _load
+            setenv
+            cleanup
+        else
+            out "Launching '$GAME'"
+            _load
+            setenv
+            prepare
+            startX
+            cleanup
+        fi
     fi
 }
 
