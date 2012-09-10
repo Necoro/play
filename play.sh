@@ -1,44 +1,67 @@
 #!/bin/zsh -f
 
-# initialization {{{
+# variables gathered from the environment {{{1
+
+# debugging
+# 0 -> off
+# 1 -> log messages (mostly 'eval' calls) and wine debug
+# 2 -> 1 + xtrace
 PLAY_DEBUG=${PLAY_DEBUG:-0}
 
 [[ $PLAY_DEBUG == 2 ]] && setopt xtrace
 
+# directory we are in
 PLAY_DIR="${PLAY_DIR:-${0:h}}"
+
+# directory of installed games
 PLAY_GAMES="${PLAY_GAMES:-$PLAY_DIR/installed}"
+
+# directory of templages
 PLAY_TEMPLATES="${PLAY_TEMPLATES:-$PLAY_DIR/templates}"
 
+# binary to echo
+PLAY_BIN="${PLAY_BIN:-$0}"
+
+# initialization of internal variables {{{1
+
+# environment dictionaries
+# ENV: name to value
+# EENV: name to string, which is evaluated into the value
 typeset -A ENV EENV
+
+# current binary -- complete path
 BIN=${0:A}
 
-PLAY_BIN=${PLAY_BIN:-$0}
-# }}}
+# global functions {{{1
 
-# global functions {{{
+# print passed arguments to stderr
+# if first arg is "-n", do not append newline
 out () {
-    if [[ $1 == "-n" ]]; then
-        n="-n"
-        shift
-    fi
+    zparseopts -D n=n
 
     echo $n ">>> $*" >&2
 }
 
+# print passed arguments to stderr ONLY if PLAY_DEBUG is nonzero
 log () {
     [[ $PLAY_DEBUG > 0 ]] && echo "*** $*" >&2
 }
 
+# die with a supplied error message
 die () {
     out "*** ERROR: $*"
     exit 1
 }
 
+# exports $1=$2
 exp () {
     log "Setting envvar '$1' to '$2'"
     export $1=$2
 }
 
+# executes the passed command including arguments 
+# (as individual parameters to this function)
+# if first arg is "-e" use exec instead of eval
 exc () {
     local cmd="eval"
 
@@ -57,15 +80,29 @@ exc () {
     fi
 }
 
-EXPORT () {
-    local name=$1
-    shift
+# exports the given key with its value in $ENV
+# NB: it also exports empty values
+set_env () {
+    local k=$1
+    local v=${ENV[$k]}
 
-    for f in $@; do
-        eval "$f () { ${name}_${f}; }"
-    done
+    v=${(P)${:-PLAY_ENV_$k}:-$v}
+    exp $k $v
 }
 
+# exports the given key with its value in $EENV
+# this implies, that the value is evaluated!
+# NB: it also exports empty values
+set_eenv () {
+    local k=$1
+    local v=${EENV[$k]}
+    v=${(P)${:-PLAY_EENV_$k}:-$v}
+    exp $k `eval $v`
+}
+
+# inherits a specified template
+# i.e. source it :)
+# if first argument is "-e", do not die if template could not be found
 inherit () {
     zparseopts -D e=nonfatal
     
@@ -81,45 +118,31 @@ inherit () {
     source $PLAY_TEMPLATES/$1
 }
 
-load () {
-    inherit -e default
+# function, that is used to _export_ the default phase functions
+# i.e. 'EXPORT bla prepare' will set bla_prepare as the function being called
+# on prepare()
+EXPORT () {
+    local name=$1
+    shift
 
-    source "$PLAY_GAMES/$1"
+    for f in $@; do
+        eval "$f () { ${name}_${f}; }"
+    done
 }
 
-set_env () {
-    local k=$1
-    local v=${ENV[$k]}
+# default enviroment {{{1
 
-    v=${(P)${:-PLAY_ENV_$k}:-$v}
-    exp $k $v
-}
-
-set_eenv () {
-    local k=$1
-    local v=${EENV[$k]}
-    v=${(P)${:-PLAY_EENV_$k}:-$v}
-    exp $k `eval $v`
-}
-
-# }}}
-
-# default template {{{
-
-# exporting variables
 EENV[WINEPREFIX]='eval echo $PREFIX'
 ENV[DISPLAY]=":1"
 
-# functions
+# phase functions {{{1
+
+# to be removed
 play_execute () {
     exc -e startx $BIN -x $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
 }
 
-play_prepare () {
-    # set display size
-    [[ -n $SIZE ]] && exc xrandr -s $SIZE
-}
-
+# populate the environment
 play_setenv () {
     # default PREFIX
     PREFIX=${PREFIX:-$GAME}
@@ -137,6 +160,7 @@ play_setenv () {
     done
 }
 
+# run wine and therefore the game
 play_run () {
     # cd into dir
     local dir="$(exc winepath -u $GPATH)"
@@ -149,13 +173,27 @@ play_run () {
     exc wineserver -w
 }
 
+# prepare things for the game, e.g. mount ISOs
+play_prepare () {
+    # set display size
+    [[ -n $SIZE ]] && exc xrandr -s $SIZE
+}
+
+# cleanup after yourself
 play_cleanup () {
 }
 
 EXPORT play execute prepare setenv run cleanup
-# }}}
 
-_list () {
+# internal functions {{{1
+
+_load () { # {{{2
+    inherit -e default
+
+    source $GAME_PATH
+}
+
+_list () { # {{{2
     out "The installed games are:"
     # on -> sort alphabetically
     # N -> NULL_GLOB -> no error message if no match
@@ -166,7 +204,7 @@ _list () {
     done
 }
 
-_new () {
+_new () { # {{{2
     local GAME=$1
     local DGAME="$PLAY_GAMES/$GAME"
     local GPATH=$2
@@ -206,38 +244,38 @@ EOF
     fi
 }
 
-_execute () {
-    declare -g GAME=$1
-    
-    load $GAME
+_execute () { # {{{2
+    _load
     prepare
     run
     cleanup
 }
 
-_run () {
-    declare -g GAME=$1
-    local DGAME="$PLAY_GAMES/$GAME"
+_run () { #{{{2
+    declare -xg GAME=$1
+    declare -xg GAME_PATH="$PLAY_GAMES/$GAME"
 
     if [[ $GAME == new ]]; then
         shift
         _new "$@"
-    elif [[ -z $GAME || ! -e $DGAME ]]; then
-        [[ ! -e $DGAME ]] && out "Game '$GAME' not found"
+    elif [[ -z $GAME || ! -e $GAME_PATH ]]; then
+        [[ ! -e $GAME_PATH ]] && out "Game '$GAME' not found"
         _list
         exit 1
     else
         out "Launching '$GAME'"
-        load $GAME
+        _load
         setenv
         execute
     fi
 }
 
+# main {{{1
 if [[ $1 == "-x" ]]; then
-    _execute $2
+    _execute
 else
     _run "$@"
 fi
+# }}}1
 
 # vim: foldmethod=marker
