@@ -16,6 +16,7 @@ cdemu_prepare () {
 }
 
 cdemu_cleanup () {
+    default_cleanup
     exc umount $(_cdemu_dev)
     exc cdemu unload $CDEMU_NO
 }

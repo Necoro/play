@@ -1,12 +1,20 @@
-default_prepare () {
+default_setupX () {
     exc nvidia-settings -l
 
+    play_setupX
+}
+
+default_prepare () {
     play_prepare
+}
+
+default_cleanup () {
+    play_cleanup
 }
 
 [[ $PLAY_DEBUG == 0 ]] && ENV[WINEDEBUG]="-all"
 EENV[WINEPREFIX]='{ [[ -z $NO_WINEINSTS ]] && echo $HOME/.wineinsts/$PREFIX; } || echo $PREFIX'
 
-EXPORT prepare
+EXPORT setupX prepare cleanup
 
 # vim:ft=sh

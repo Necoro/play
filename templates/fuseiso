@@ -10,6 +10,7 @@ fuseiso_prepare () {
 }
 
 fuseiso_cleanup () {
+    default_cleanup
     exc fusermount -u $MOUNTTARGET
 }
 

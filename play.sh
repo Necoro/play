@@ -149,13 +149,13 @@ ENV[DISPLAY]=":1"
 # phase functions {{{1
 
 # Array of phases
-PHASES=(startX setenv run prepare cleanup)
+PHASES=(setenv prepare setupX startX run cleanup)
 declare -r PHASES
 
 # starts a new X
 # if overridden, this MUST call `$BIN --in-X`
 play_startX () {
-    exc -e startx $BIN --in-X $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
+    exc startx $BIN --in-X $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
 }
 
 # populate the environment
@@ -189,10 +189,14 @@ play_run () {
     exc wineserver -w
 }
 
-# prepare things for the game, e.g. mount ISOs
-play_prepare () {
+# manipulate the newly created X instance
+play_setupX () {
     # set display size
     [[ -n $SIZE ]] && exc xrandr -s $SIZE
+}
+
+# prepare things for the game, e.g. mount ISOs
+play_prepare () {
 }
 
 # cleanup after yourself
@@ -262,9 +266,8 @@ EOF
 
 _continue_in_X () { # {{{2
     _load
-    prepare
+    setupX
     run
-    cleanup
 }
 
 _run () { #{{{2
@@ -282,7 +285,9 @@ _run () { #{{{2
         out "Launching '$GAME'"
         _load
         setenv
+        prepare
         startX
+        cleanup
     fi
 }
 

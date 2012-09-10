@@ -4,8 +4,8 @@ GPATH=c:/spiele/ff8/FF8.exe
 SIZE=1024x768
 MOUNT=ff8/FF8_CD1.iso
 
-prepare () {
-    iso_prepare
+setupX () {
+    default_setupX
     exc nvidia-settings -a FSAA=1
     exc nvidia-settings -a FSAAAppControlled=0
 }
