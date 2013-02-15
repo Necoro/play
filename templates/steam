@@ -1,13 +1,13 @@
 if loaded wine; then
     PREFIX="steam"
     #SIZE="1280x960"
-    GPATH="c:/program files/steam/steam.exe"
+    EXE="c:/program files/steam/steam.exe"
 
     steamapp () {
         [[ $# -gt 0 ]] && export ARGS="-applaunch ${=@}"
     }
 else
-    GPATH=steam
+    EXE=steam
     SIZE=1680x1050
 
     steamapp () {

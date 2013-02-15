@@ -2,7 +2,7 @@ inherit wine
 #inherit iso
 
 PREFIX=~/.ffwine
-GPATH=c:/spiele/ff7/ff7.exe
+EXE=c:/spiele/ff7/ff7.exe
 SIZE="1280x960"
 
 MOUNT=ff8/FF8_CD1.iso

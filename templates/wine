@@ -4,7 +4,7 @@ PREFIX=${PREFIX:-$GAME}
 # run wine and therefore the game
 wine_run () {
     # cd into dir
-    local dir="$(exc winepath -u $GPATH)"
+    local dir="$(exc winepath -u $EXE)"
     exc cd "${dir:h}"
 
     # start game

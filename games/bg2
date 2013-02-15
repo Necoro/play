@@ -3,7 +3,7 @@ ISO_TYPE=fuseiso
 inherit wine iso
 
 SIZE="1280x960"
-GPATH="c:/bg2/bgmain.exe"
+EXE="c:/bg2/bgmain.exe"
 
 MOUNT="bg2/tob.iso"
 MOUNTTARGET="$HOME/isos/mnt/tob"

@@ -1,6 +1,6 @@
 inherit wine iso
 
-GPATH=c:/spiele/ff8/FF8.exe
+EXE=c:/spiele/ff8/FF8.exe
 SIZE=1024x768
 MOUNT=ff8/FF8_CD1.iso
 

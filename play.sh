@@ -243,7 +243,7 @@ play_setenv () {
 
 # run game
 play_run () {
-    exc $GPATH "$ARGS"
+    exc $EXE "$ARGS"
 }
 
 # manipulate the newly created X instance
@@ -295,7 +295,7 @@ _list () { # {{{2
 _new () { # {{{2
     local GAME=$1
     local DGAME="$PLAY_GAMES/$GAME"
-    local GPATH=$2
+    local EXE=$2
     local PREFIX=${${3}:-$GAME}
     local convpath
 
@@ -307,7 +307,7 @@ _new () { # {{{2
     
     [[ ! -e $WINEPREFIX ]] && die "Specified prefix '$PREFIX' does not exist"
 
-    convpath="$(exc winepath -u $GPATH)"
+    convpath="$(exc winepath -u $EXE)"
 
     [[ ! -e $convpath ]] && die "Specified executable does not exist"
 
@@ -318,7 +318,7 @@ _new () { # {{{2
 inherit wine
 
 $GPREFIX
-GPATH="$GPATH"
+EXE="$EXE"
 
 # vim:ft=sh
 EOF

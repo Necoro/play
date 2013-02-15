@@ -5,7 +5,7 @@ inherit wine iso
 PREFIX="infinity"
 #SIZE="1280x960"
 SIZE="1280x960"
-GPATH="c:/torment/torment.exe"
+EXE="c:/torment/torment.exe"
 EXARGS="-depth 16"
 
 mnttrgt="$WINEPREFIX/drive_c/tormentcds"
