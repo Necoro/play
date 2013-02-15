@@ -12,6 +12,7 @@ mnttrgt="$WINEPREFIX/drive_c/tormentcds"
 
 prepare ()
 {
+    super -r iso
     for i in 1 2 3 4; do
         MOUNTTARGET="$mnttrgt/cd$i"
         MOUNT=torment/TormentCD$i.iso
@@ -21,6 +22,7 @@ prepare ()
 
 cleanup ()
 {
+    super -r iso
     for i in 1 2 3 4; do
         MOUNTTARGET="$mnttrgt/cd$i"
         iso_cleanup
