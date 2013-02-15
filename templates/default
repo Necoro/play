@@ -4,16 +4,21 @@ default_setupX () {
     play_setupX
 }
 
+default_setenv () {
+    if loaded wine; then
+        EENV[WINEPREFIX]='{ [[ -z $NO_WINEINSTS ]] && echo $HOME/.wineinsts/$PREFIX; } || echo $PREFIX'
+    fi
+
+    play_setenv
+}
+
 default_prepare () {
-    play_prepare
 }
 
 default_cleanup () {
-    play_cleanup
 }
 
-EENV[WINEPREFIX]='{ [[ -z $NO_WINEINSTS ]] && echo $HOME/.wineinsts/$PREFIX; } || echo $PREFIX'
-
-EXPORT setupX prepare cleanup
+EXPORT prepare cleanup
+OVERRIDE setenv setupX
 
 # vim:ft=sh

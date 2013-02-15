@@ -1,9 +1,25 @@
-PREFIX="steam"
-SIZE="1280x960"
-GPATH="c:/program files/steam/steam.exe"
+if loaded wine; then
+    PREFIX="steam"
+    #SIZE="1280x960"
+    GPATH="c:/program files/steam/steam.exe"
 
-steamapp () {
-    [[ $# > 0 ]] && export ARGS="-applaunch ${=@}"
-}
+    steamapp () {
+        [[ $# -gt 0 ]] && export ARGS="-applaunch ${=@}"
+    }
+else
+    GPATH=steam
+    SIZE=1680x1050
+
+    steamapp () {
+        [[ $# -gt 0 ]] && export ARGS="steam://rungameid/$1"
+    }
+
+    # force cleanup -- yields a normal shutdown
+    steam_cleanup () {
+        [[ $1 == force ]] && exc steam -shutdown
+    }
+
+    OVERRIDE cleanup
+fi
 
 # vim:ft=sh

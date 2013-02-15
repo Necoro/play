@@ -1,0 +1,18 @@
+EENV[WINEPREFIX]='eval echo $PREFIX'
+PREFIX=${PREFIX:-$GAME}
+
+# run wine and therefore the game
+wine_run () {
+    # cd into dir
+    local dir="$(exc winepath -u $GPATH)"
+    exc cd "${dir:h}"
+
+    # start game
+    exc wine start ${dir:t} "$ARGS"
+
+    # wait for wine to shutdown
+    exc wineserver -w
+}
+
+OVERRIDE run
+# vim: ft=sh

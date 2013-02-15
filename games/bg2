@@ -1,6 +1,6 @@
 ISO_TYPE=fuseiso
 
-inherit iso
+inherit wine iso
 
 SIZE="1280x960"
 GPATH="c:/bg2/bgmain.exe"

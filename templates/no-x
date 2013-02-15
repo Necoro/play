@@ -1,0 +1,12 @@
+unset "ENV[DISPLAY]"
+
+no-x_startX () {
+    exc $BIN --in-X $GAME
+}
+
+no-x_setupX () {
+}
+
+OVERRIDE startX setupX
+
+# vim:ft=sh

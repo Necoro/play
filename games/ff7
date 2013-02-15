@@ -1,3 +1,4 @@
+inherit wine
 #inherit iso
 
 PREFIX=~/.ffwine

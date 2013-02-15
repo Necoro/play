@@ -1,5 +1,10 @@
 #!/bin/zsh -f
 
+# ZSH setup {{{1
+
+# make the $functions and $functracs variables available
+zmodload -F zsh/parameter +p:functions +p:functrace
+
 # variables gathered from the environment {{{1
 
 # debugging
@@ -36,6 +41,14 @@ BIN=${0:A}
 # current template -- used for EXPORT
 CUR_TEMPLATE=play
 
+# array of loaded templates
+declare -a TEMPLATES
+
+# Array of phases
+PHASES=(setenv prepare setupX startX run cleanup)
+declare -r PHASES
+declare -A PHASE_FUNS
+
 # global functions {{{1
 
 # print passed arguments to stderr
@@ -48,7 +61,7 @@ out () {
 
 # print passed arguments to stderr ONLY if PLAY_DEBUG is nonzero
 log () {
-    [[ $PLAY_DEBUG > 0 ]] && echo "*** $*" >&2
+    (( PLAY_DEBUG > 0 )) && echo "*** $*" >&2
 }
 
 # die with a supplied error message
@@ -66,19 +79,25 @@ exp () {
 # executes the passed command including arguments 
 # (as individual parameters to this function)
 # if first arg is "-e" use exec instead of eval
+# if first arg is "-b" background the job
 exc () {
-    local cmd="eval"
+    local cmd="eval" bg
 
     if [[ $1 == "-e" ]]; then
         cmd="exec"
         shift
+    elif [[ $1 == "-b" ]]; then
+        bg=" in background"
+        shift
     fi
 
-    log "Executing (using '$cmd'):"
+    log "Executing (using '$cmd'$bg):"
     log "> $*"
 
     if [[ $cmd == exec ]]; then
         exec $@
+    elif [[ -n $bg ]]; then
+        $* &
     else
         $*
     fi
@@ -110,50 +129,96 @@ set_eenv () {
 inherit () {
     zparseopts -D e=nonfatal
     
-    local old_templ=$CUR_TEMPLATE
+    for templ; do
+        local old_templ=$CUR_TEMPLATE
 
-    CUR_TEMPLATE=$1
+        CUR_TEMPLATE=$templ
 
-    if [[ ! -e $PLAY_TEMPLATES/$1 ]]; then
-        if [[ -n $nonfatal ]]; then
-            log "Template '$1' not found"
-            return
-        else
-            die "Template '$1' not found"
+        if [[ ! -e $PLAY_TEMPLATES/$templ ]]; then
+            if [[ -n $nonfatal ]]; then
+                log "Template '$templ' not found"
+                return
+            else
+                die "Template '$templ' not found"
+            fi
         fi
-    fi
-    
-    source $PLAY_TEMPLATES/$1
 
-    CUR_TEMPLATE=$old_templ
+        source $PLAY_TEMPLATES/$templ
+
+        TEMPLATES+=$CUR_TEMPLATE
+
+        CUR_TEMPLATE=$old_templ
+    done
+}
+
+# returns true iff the given template has been loaded
+loaded () {
+    (( $+TEMPLATES[(r)$1] ))
+}
+
+# run the chain of functions of the templates for the phase
+# it gets called from
+# Param: -r -> remove the phase of this template
+super () {
+    zparseopts -D r+:=removes
+    local caller=$funcstack[2] funs=
+
+    if (( $+PHASES[(r)$caller] )); then
+        removes=(${removes/-r/})
+        if [[ -n $removes ]]; then
+            removes=(${removes/%/_$caller})
+            funs=(${(s.:.)PHASE_FUNS[$caller]})
+            funs=(${funs:|removes})
+            eval ${(F)funs}
+        else
+            _$caller
+        fi
+    else
+        log "'super' called from non-phase '$caller'"
+    fi
 }
 
 # function, that is used to _export_ the default phase functions
-# i.e. 'EXPORT prepare' in template 'bla' will set bla_prepare as the function being called
+# i.e. 'EXPORT prepare' in template 'bla' will add bla_prepare to the functions being called
 # on prepare()
 # NB: this relies on CUR_TEMPLATE being correct -- DO NOT set CUR_TEMPLATE in a game file!
 EXPORT () {
-    for f in $@; do
-        if [[ -n $PHASES[(r)$f] ]]; then
-            eval "$f () { ${CUR_TEMPLATE}_${f}; }"
+    local override
+    local fun
+
+    for phase; do
+        if [[ $phase == *_override ]]; then
+            override=1
+            phase=${phase%_override}
         else
-            log "Invalid phase function '$f' exported in $CUR_TEMPLATE"
+            override=0
+        fi
+
+        fun=${CUR_TEMPLATE}_${phase}
+
+        if (( $+PHASES[(r)$phase] )); then
+            if (( override )); then
+                PHASE_FUNS[$phase]=$fun
+            else
+                PHASE_FUNS[$phase]+=:$fun
+            fi
+        else
+            log "Invalid phase function '$phase' exported in $CUR_TEMPLATE"
         fi
     done
 }
 
+OVERRIDE () {
+    EXPORT ${argv/%/_override}
+}
+
 # default enviroment {{{1
 
-EENV[WINEPREFIX]='eval echo $PREFIX'
 ENV[DISPLAY]=":1"
 
-[[ $PLAY_DEBUG -le 1 ]] && ENV[WINEDEBUG]="-all"
+(( PLAY_DEBUG <= 1 )) && ENV[WINEDEBUG]="-all"
 
 # phase functions {{{1
-
-# Array of phases
-PHASES=(setenv prepare setupX startX run cleanup)
-declare -r PHASES
 
 # starts a new X
 # if overridden, this MUST call `$BIN --in-X`
@@ -163,9 +228,6 @@ play_startX () {
 
 # populate the environment
 play_setenv () {
-    # default PREFIX
-    PREFIX=${PREFIX:-$GAME}
-
     # set environment
     # ENV is set directly -- EENV is evaluated
     # it is possible to override ENV[p] by PLAY_ENV_p
@@ -179,17 +241,9 @@ play_setenv () {
     done
 }
 
-# run wine and therefore the game
+# run game
 play_run () {
-    # cd into dir
-    local dir="$(exc winepath -u $GPATH)"
-    exc cd "${dir:h}"
-
-    # start game
-    exc wine start ${dir:t} "$ARGS"
-    
-    # wait for wine to shutdown
-    exc wineserver -w
+    exc $GPATH "$ARGS"
 }
 
 # manipulate the newly created X instance
@@ -206,14 +260,25 @@ play_prepare () {
 play_cleanup () {
 }
 
-EXPORT $PHASES[@]
+OVERRIDE $PHASES[@]
+
+for phase in $PHASES; do
+    functions[$phase]=_$phase
+done
 
 # internal functions {{{1
 
 _load () { # {{{2
     inherit -e default
-
     source $GAME_PATH
+
+    local funs
+
+    for phase in $PHASES; do
+        funs=(${(s.:.)PHASE_FUNS[$phase]})
+        funs=(${funs/%/ \$@})
+        functions[_$phase]=${(F)funs}
+    done
 }
 
 _list () { # {{{2
@@ -250,6 +315,8 @@ _new () { # {{{2
 
     # everything is fine -- write file
     cat > $DGAME << EOF
+inherit wine
+
 $GPREFIX
 GPATH="$GPATH"
 
@@ -289,7 +356,7 @@ _run () { #{{{2
             out "Cleaning up after '$GAME'"
             _load
             setenv
-            cleanup
+            cleanup force
         else
             out "Launching '$GAME'"
             _load

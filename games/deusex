@@ -1,3 +1,5 @@
+inherit wine
+
 PREFIX="deus_ex"
 GPATH="c:/DeusEx/System/HDTP.exe"
 ARGS=QINI=C:/deusex/system/hdtp.ini USERINI=C:/deusex/system/hdtpuser.ini

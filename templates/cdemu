@@ -4,8 +4,6 @@ _cdemu_dev () {
 }
 
 cdemu_prepare () {
-    default_prepare
-
     declare -g MOUNT CDEMU_NO
 
     [[ $MOUNT != /* ]] && MOUNT="$HOME/isos/spiele/$MOUNT"
@@ -16,7 +14,6 @@ cdemu_prepare () {
 }
 
 cdemu_cleanup () {
-    default_cleanup
     exc umount $(_cdemu_dev)
     exc cdemu unload $CDEMU_NO
 }

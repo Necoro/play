@@ -1,4 +1,4 @@
-inherit steam
+inherit wine steam
 
 steamapp 29200
 

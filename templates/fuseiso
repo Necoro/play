@@ -1,7 +1,5 @@
 
 fuseiso_prepare () {
-    default_prepare
-
     declare -g MOUNT MOUNTTARGET
 
     [[ $MOUNT != /* ]] && MOUNT="$HOME/isos/spiele/$MOUNT"
@@ -10,7 +8,6 @@ fuseiso_prepare () {
 }
 
 fuseiso_cleanup () {
-    default_cleanup
     exc fusermount -u $MOUNTTARGET
 }
 

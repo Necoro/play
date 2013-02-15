@@ -1,0 +1,21 @@
+xpad_prepare () {
+    declare -g XBOX_PID XBOX_DEADZONE XBOX_UIAXISMAP \
+               XBOX_UIBUTTONMAP XBOX_NO_FF
+
+    local args="--silent \
+                --deadzone ${XBOX_DEADZONE:-4000}"
+
+    [[ -n $XBOX_UIAXISMAP ]] && args+=" --ui-axismap $XBOX_UIAXISMAP"
+    [[ -n $XBOX_UIBUTTONMAP ]] && args+=" --ui-buttonmap $XBOX_UIBUTTONMAP"
+    [[ -z $XBOX_NO_FF ]] || args+=" --force-feedback"
+
+    exc -b xboxdrv ${=args}
+    XBOX_PID=$!
+}
+
+xpad_cleanup () {
+    [[ -n $XBOX_PID ]] && exc kill -SIGINT $XBOX_PID
+}
+
+EXPORT prepare cleanup
+# vim:ft=sh

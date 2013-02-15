@@ -1,6 +1,6 @@
 ISO_TYPE=fuseiso
 
-inherit iso
+inherit wine iso
 
 PREFIX="infinity"
 #SIZE="1280x960"

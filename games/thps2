@@ -1,3 +1,5 @@
+inherit wine
+
 PREFIX="thps2"
 SIZE="1024x768"
 GPATH="c:/thps2/THawk2.exe"

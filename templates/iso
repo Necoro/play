@@ -1,3 +1,6 @@
+#
+# NB: MUST be included before other templates defining cleanup and prepare
+#
 
 if [[ -z $ISO_TYPE ]]; then
     # default
@@ -18,12 +21,16 @@ esac
 # wrapper phases
 
 iso_prepare () {
+    default_prepare
     ${ISO_TYPE}_prepare
 }
 
 iso_cleanup () {
+    default_cleanup
     ${ISO_TYPE}_cleanup
 }
 
-EXPORT prepare cleanup
+# we need to OVERRIDE and not EXPORT, to not execute them twice
+# as they are already exported in the other template
+OVERRIDE prepare cleanup
 # vim:ft=sh
