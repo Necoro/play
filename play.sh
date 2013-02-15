@@ -223,7 +223,7 @@ ENV[DISPLAY]=":1"
 # starts a new X
 # if overridden, this MUST call `$BIN --in-X`
 play_startX () {
-    exc startx $BIN --in-X $GAME -- $DISPLAY -ac -br -quiet ${=EXARGS}
+    exc startx $BIN --in-X $GAME -- $DISPLAY -ac -br -quiet ${=X_ARGS}
 }
 
 # populate the environment

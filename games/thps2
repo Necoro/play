@@ -3,6 +3,6 @@ inherit wine
 PREFIX="thps2"
 SIZE="1024x768"
 EXE="c:/thps2/THawk2.exe"
-EXARGS="-depth 16"
+X_ARGS="-depth 16"
 
 # vim:ft=sh

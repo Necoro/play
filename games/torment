@@ -6,7 +6,7 @@ PREFIX="infinity"
 #SIZE="1280x960"
 SIZE="1280x960"
 EXE="c:/torment/torment.exe"
-EXARGS="-depth 16"
+X_ARGS="-depth 16"
 
 mnttrgt="$WINEPREFIX/drive_c/tormentcds"
 
