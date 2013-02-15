@@ -263,7 +263,7 @@ play_cleanup () {
 OVERRIDE $PHASES[@]
 
 for phase in $PHASES; do
-    functions[$phase]=_$phase
+    functions[$phase]="_$phase \$@"
 done
 
 # internal functions {{{1
