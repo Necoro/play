@@ -301,9 +301,8 @@ _new () { # {{{2
 
     [[ -e $DGAME ]] && die "Game file already existing -- aborting!"
 
-    inherit -e default
-    set_eenv WINEPREFIX
-    set_env WINEDEBUG
+    inherit -e default wine
+    setenv
     
     [[ ! -e $WINEPREFIX ]] && die "Specified prefix '$PREFIX' does not exist"
 
