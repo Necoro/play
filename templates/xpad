@@ -1,6 +1,6 @@
 xpad_prepare () {
     declare -g XBOX_PID XBOX_DEADZONE XBOX_UIAXISMAP \
-               XBOX_UIBUTTONMAP XBOX_NO_FF
+               XBOX_UIBUTTONMAP XBOX_NO_FF XBOX_ARGS
 
     local args="--silent \
                 --deadzone ${XBOX_DEADZONE:-4000}"
@@ -9,7 +9,7 @@ xpad_prepare () {
     [[ -n $XBOX_UIBUTTONMAP ]] && args+=" --ui-buttonmap $XBOX_UIBUTTONMAP"
     [[ -z $XBOX_NO_FF ]] || args+=" --force-feedback"
 
-    exc -b xboxdrv ${=args}
+    exc -b xboxdrv ${=args} ${=XBOX_ARGS}
     XBOX_PID=$!
 }
 
